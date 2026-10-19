@@ -4,10 +4,15 @@
 	"private": true,
 	"description": "Technical-support agent built release by release with LangChain v1 / LangGraph v1.",
 	"engines": {
-		"node": ">=22"
+		"node": ">=22.13"
 	},
-	"scripts": {},
-	"author": "",
+	"scripts": {
+		"dev": "tsx watch src/server/index.ts",
+		"lint": "eslint .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"author": "AZ",
 	"license": "MIT",
 	"devEngines": {
 		"packageManager": {
@@ -19,6 +24,17 @@
 	"packageManager": "pnpm@12.14.0",
 	"type": "module",
 	"devDependencies": {
-		"lefthook": "^2.2.2"
+		"@eslint/js": "^10.0.1",
+		"@types/node": "^22.20.5",
+		"eslint": "^10.13.0",
+		"lefthook": "^2.2.2",
+		"tsx": "^4.23.15",
+		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.71.2",
+		"vitest": "^5.0.5"
+	},
+	"dependencies": {
+		"fastify": "^5.12.7",
+		"zod": "^4.6.7"
 	}
 }
