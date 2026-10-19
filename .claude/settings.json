@@ -6,7 +6,6 @@
 			"Bash(pnpm test *)",
 			"Bash(pnpm evals *)",
 			"Bash(pnpm vitest *)",
-			"Bash(pnpm install --frozen-lockfile)",
 			"Bash(git status)",
 			"Bash(git diff *)",
 			"Bash(git log *)",
@@ -14,15 +13,7 @@
 			"WebFetch(domain:langfuse.com)",
 			"WebFetch(domain:modelcontextprotocol.io)"
 		],
-		"ask": [
-			"Bash(git commit *)",
-			"Bash(git push *)",
-			"Bash(pnpm add *)",
-			"Bash(pnpm remove *)",
-			"Bash(pnpm update *)",
-			"Bash(pnpm dlx *)",
-			"Bash(docker *)"
-		],
+		"ask": ["Bash(git commit *)", "Bash(git push *)", "Bash(docker *)"],
 		"deny": [
 			"Read(.env)",
 			"Read(.env.local)",
@@ -37,11 +28,17 @@
 			"Bash(npx *)",
 			"Bash(yarn *)",
 			"Bash(git commit --no-verify *)",
-			"Bash(git commit -n *)"
+			"Bash(git commit -n *)",
+			"Bash(pnpm add *)",
+			"Bash(pnpm remove *)",
+			"Bash(pnpm update *)",
+			"Bash(pnpm dlx *)",
+			"Bash(pnpm install *)"
 		]
 	},
 	"sandbox": {
 		"enabled": true,
+		"allowUnsandboxedCommands": false,
 		"filesystem": {
 			"denyRead": ["./.env", "./.env.local", "~/.ssh", "~/.aws"]
 		},

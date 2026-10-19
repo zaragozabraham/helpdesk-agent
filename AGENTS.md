@@ -21,27 +21,37 @@ Current release: R0 — project foundations (tooling, CI, security guardrails).
 
 ## Commands
 
-- Install: `pnpm install --frozen-lockfile`
-- Dev server: `pnpm dev`
+Run by the agent (inside the sandbox):
+
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`
 - Unit tests: `pnpm test`
 - Single test file: `pnpm vitest run path/to/file.test.ts`
-- Evals: `pnpm evals`
-- Add a dependency (ask first): `pnpm add <pkg>` / dev: `pnpm add -D <pkg>`
-- Run a one-off package (ask first): `pnpm dlx <pkg>`
-- Local infra (Postgres + Langfuse): `docker compose up -d`
+- Evals: `pnpm evals` *(added in R1; does not exist yet)*
+
+Run by the user in their own terminal. Propose the exact command, explain why, and wait:
+
+- Install dependencies: `pnpm install --frozen-lockfile`
+- Add a dependency: `pnpm add <pkg>` / dev: `pnpm add -D <pkg>`
+- Remove or update a dependency: `pnpm remove <pkg>` / `pnpm update <pkg>`
+- One-off package: `pnpm dlx <pkg>`
+- Dev server: `pnpm dev` (tsx needs a local socket that the sandbox blocks)
+- Local infra (Postgres + Langfuse): `docker compose up -d` *(added later in R0; does not exist yet)*
+
+Never ask to run a blocked command outside the sandbox; hand it to the user instead.
 
 ## Project structure
 
-<!-- TODO: adjust to the real layout -->
-
-- `src/agent/` — agents, graphs and prompts
-- `src/tools/` — one file per tool, with its Zod schema
-- `src/server/` — Fastify routes
-- `test/` — unit and integration tests
-- `evals/` — datasets and eval runners
+- `src/config.ts` — environment config, validated with Zod
+- `src/server/` — Fastify app (`app.ts`, built without listening so tests use `inject()`) and entry point (`index.ts`)
+- `test/` — Vitest tests, mirroring `src/` (e.g. `test/server/health.test.ts`)
 - `docs/` — specs, ADRs, threat model
+
+Planned, not created yet:
+
+- `src/agent/` — agents, graphs and prompts (R1–R2)
+- `src/tools/` — one file per tool, with its Zod schema (R2)
+- `evals/` — datasets and eval runners (R1)
 
 ## Code conventions
 
@@ -61,7 +71,7 @@ Current release: R0 — project foundations (tooling, CI, security guardrails).
 
 - Explore and propose a plan before writing code; wait for approval.
 - Small changes: one logical change per commit, Conventional Commits format.
-- Ask before adding a dependency, and explain why it's needed.
+- Before adding a dependency, explain why it's needed; the user runs the install.
 - If something is ambiguous, ask instead of guessing.
 - Work on a feature branch; never commit directly to main.
 
