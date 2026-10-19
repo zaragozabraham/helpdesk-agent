@@ -19,6 +19,7 @@
 - Third-party GitHub Actions and Dependabot update PRs
 - MCP servers connected to the coding agent
 - Web pages and docs the coding agent fetches
+- HTTP requests to the Fastify server (R0: only `GET /health`)
 
 ## Capabilities per tool / agent
 
@@ -47,7 +48,10 @@
 | Coding agent can't bypass hooks or force-push | `.claude/settings.json` (deny rules)            | R0 gate: force-push denied                   |
 | Sandboxed shell with network allowlist      | `.claude/settings.json` (`sandbox`)               | R0 gate: `touch ~/sandbox-probe` fails       |
 | Dependency audit                            | `.github/workflows/ci.yaml`                       | `pnpm audit` in CI                           |
-| Dependency build scripts blocked by default | `pnpm-workspace.yaml`                             | —                                            |
+| Coding agent can't run unsandboxed or change dependencies; installs are human-run | `.claude/settings.json` (`allowUnsandboxedCommands: false`, deny rules), `AGENTS.md` | Ask the agent to `pnpm add` a package → denied |
+| Dependency build scripts blocked by default | `pnpm-workspace.yaml` (`lefthook`, `esbuild` explicitly denied) | `pnpm install --frozen-lockfile` fails on any undecided build script |
+| Server env validated; errors never echo values | `src/config.ts` (Zod)                          | `test/config.test.ts`                        |
+| Server binds to loopback by default; `/health` exposes no version or internals | `src/config.ts`, `src/server/app.ts` | `test/server/health.test.ts`, `test/config.test.ts` |
 
 ## Accepted residual risk
 
@@ -55,3 +59,4 @@
 - The coding agent sends source code to the LLM provider as part of normal operation. Accepted: the repository contains no customer data or secrets.
 - A human can skip the pre-commit hook locally with `--no-verify`. The CI `secrets` job is the backstop.
 - Approved dependencies can still be compromised in a later release. Mitigated by the lockfile, `pnpm audit` and reviewing Dependabot PRs, not eliminated.
+- Dependency installs run in the user's terminal, outside the sandbox (pnpm 12 needs a system-level lock the macOS sandbox blocks), so the sandbox network allowlist does not apply to them. Accepted: a human reviews each package, build scripts stay blocked by `pnpm-workspace.yaml`, and CI re-runs `pnpm install --frozen-lockfile` and `pnpm audit`.
