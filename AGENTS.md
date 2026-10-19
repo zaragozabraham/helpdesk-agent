@@ -63,6 +63,7 @@ Current release: R0 — project foundations (tooling, CI, security guardrails).
 - Small changes: one logical change per commit, Conventional Commits format.
 - Ask before adding a dependency, and explain why it's needed.
 - If something is ambiguous, ask instead of guessing.
+- Work on a feature branch; never commit directly to main.
 
 ## Security
 
