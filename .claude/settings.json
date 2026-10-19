@@ -40,7 +40,13 @@
 		"enabled": true,
 		"allowUnsandboxedCommands": false,
 		"filesystem": {
-			"denyRead": ["./.env", "./.env.local", "~/.ssh", "~/.aws"]
+			"denyRead": [
+				"./.env",
+				"./.env.local",
+				"./infra/langfuse/.env",
+				"~/.ssh",
+				"~/.aws"
+			]
 		},
 		"network": {
 			"allowedDomains": ["registry.npmjs.org", "github.com"]
