@@ -1,0 +1,52 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(pnpm lint *)",
+			"Bash(pnpm typecheck *)",
+			"Bash(pnpm test *)",
+			"Bash(pnpm evals *)",
+			"Bash(pnpm vitest *)",
+			"Bash(pnpm install --frozen-lockfile)",
+			"Bash(git status)",
+			"Bash(git diff *)",
+			"Bash(git log *)",
+			"WebFetch(domain:docs.langchain.com)",
+			"WebFetch(domain:langfuse.com)",
+			"WebFetch(domain:modelcontextprotocol.io)"
+		],
+		"ask": [
+			"Bash(git commit *)",
+			"Bash(git push *)",
+			"Bash(pnpm add *)",
+			"Bash(pnpm remove *)",
+			"Bash(pnpm update *)",
+			"Bash(pnpm dlx *)",
+			"Bash(docker *)"
+		],
+		"deny": [
+			"Read(.env)",
+			"Read(.env.local)",
+			"Read(.env.*.local)",
+			"Read(./secrets/**)",
+			"Bash(git push --force *)",
+			"Bash(git push -f *)",
+			"Bash(rm -rf *)",
+			"Bash(curl *)",
+			"Bash(wget *)",
+			"Bash(npm *)",
+			"Bash(npx *)",
+			"Bash(yarn *)",
+			"Bash(git commit --no-verify *)",
+			"Bash(git commit -n *)"
+		]
+	},
+	"sandbox": {
+		"enabled": true,
+		"filesystem": {
+			"denyRead": ["./.env", "./.env.local", "~/.ssh", "~/.aws"]
+		},
+		"network": {
+			"allowedDomains": ["registry.npmjs.org", "github.com"]
+		}
+	}
+}

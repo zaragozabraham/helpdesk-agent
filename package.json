@@ -1,0 +1,24 @@
+{
+	"name": "helpdesk-agent",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Technical-support agent built release by release with LangChain v1 / LangGraph v1.",
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {},
+	"author": "",
+	"license": "MIT",
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "12.14.0",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@12.14.0",
+	"type": "module",
+	"devDependencies": {
+		"lefthook": "^2.2.2"
+	}
+}

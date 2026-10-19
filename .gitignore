@@ -1,0 +1,69 @@
+# Dependencies & Package Managers
+# ------------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# TypeScript & Build Outputs
+# ------------------------------------------------------------------------------
+dist/
+build/
+*.tsbuildinfo
+
+# Testing, Coverage & Evals
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+eval-results/
+
+# Logs & Process Artifacts
+# ------------------------------------------------------------------------------
+logs/
+*.log
+
+# Docker & Local Infrastructure (Postgres/Langfuse volumes)
+# ------------------------------------------------------------------------------
+.docker/
+docker/data/
+postgres_data/
+pgdata/
+
+# IDE & Operating System Files
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Temp & Cache
+# ------------------------------------------------------------------------------
+.cache/
+.temp/
+tmp/
+
+# Secrets & Environment
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+
+# Claude Code (personal / local only)
+# ------------------------------------------------------------------------------
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
