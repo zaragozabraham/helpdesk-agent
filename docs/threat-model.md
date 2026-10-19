@@ -2,16 +2,18 @@
 
 **Last updated:** 2026-10-19 · **Release: R0**
 
-> R0 has no product agent yet. This version covers the development environment: the repository, CI and the coding agent used to build the product.
+> R0 has no product agent yet. This version covers the development environment: the repository, CI, the coding agent used to build the product, and the local services it runs on (Langfuse and Ollama).
 
 ## Assets
 
 | Asset                          | Type       | Sensitivity |
 | :----------------------------- | :--------- | :---------- |
-| LLM provider API keys          | credential | High        |
-| Langfuse keys                  | credential | Medium      |
+| LLM provider API keys          | credential | High (none yet: local Ollama needs no key) |
+| Langfuse project API keys      | credential | Medium      |
+| Langfuse stack secrets (`infra/langfuse/.env`) | credential | High |
 | GitHub credentials & CI tokens | credential | High        |
 | Source code & git history      | data       | Medium      |
+| Trace data in Langfuse (prompts, outputs, metadata) | data | Low in R0; High from R1, when traces contain ticket content |
 
 ## Untrusted input sources
 
@@ -20,6 +22,8 @@
 - MCP servers connected to the coding agent
 - Web pages and docs the coding agent fetches
 - HTTP requests to the Fastify server (R0: only `GET /health`)
+- Model weights pulled from the Ollama registry
+- Third-party container images for the Langfuse stack
 
 ## Capabilities per tool / agent
 
@@ -34,8 +38,8 @@
 | Risk (LLM01–10 / ASI01–10)          | Applies | Mitigation                                                                                                   | Test that verifies it                              |
 | :---------------------------------- | :-----: | :----------------------------------------------------------------------------------------------------------- | :------------------------------------------------- |
 | LLM01:2025 Prompt Injection         |   ⚠️    | Coding agent reads external docs: network and WebFetch allowlists, human approval for push and dependencies | Partial: no automated test yet                     |
-| LLM02:2025 Sensitive Info Disclosure |   ✅    | `.env*` ignored by git, denied to the coding agent, secret scanning before commit and in CI                  | R0 gate: secret-read and fake-token commit tests   |
-| LLM03:2025 Supply Chain             |   ✅    | `pnpm audit` in CI, Dependabot, dependency build scripts blocked by default, `pnpm add`/`dlx` need approval, MCP servers reviewed before use | CI `dependencies` job                              |
+| LLM02:2025 Sensitive Info Disclosure |   ✅    | `.env*` ignored by git, denied to the coding agent, secret scanning before commit and in CI; local LLM keeps prompts on the machine; Langfuse reachable only from localhost | R0 gate: secret-read and fake-token commit tests; `cat infra/langfuse/.env` denied |
+| LLM03:2025 Supply Chain             |   ✅    | `pnpm audit` in CI, Dependabot, dependency build scripts blocked by default, installs are human-run, MCP servers reviewed before use; container images pinned to a major version; Ollama models pinned to an explicit tag | CI `dependencies` job                              |
 | LLM06:2025 Excessive Agency         |   ✅    | Coding agent: ask for commit/push/add, deny force-push, `rm -rf` and `--no-verify`; sandboxed shell          | R0 gate: push prompts, force-push denied, sandbox probe |
 
 ## Implemented mitigations
@@ -50,6 +54,11 @@
 | Dependency audit                            | `.github/workflows/ci.yaml`                       | `pnpm audit` in CI                           |
 | Coding agent can't run unsandboxed or change dependencies; installs are human-run | `.claude/settings.json` (`allowUnsandboxedCommands: false`, deny rules), `AGENTS.md` | Ask the agent to `pnpm add` a package → denied |
 | Dependency build scripts blocked by default | `pnpm-workspace.yaml` (`lefthook`, `esbuild` explicitly denied) | `pnpm install --frozen-lockfile` fails on any undecided build script |
+| Langfuse ports bound to loopback only      | `infra/langfuse/docker-compose.yml`               | `docker compose config \| grep host_ip` shows only `127.0.0.1` |
+| Langfuse sign-up closed after the first account | `infra/langfuse` (`AUTH_DISABLE_SIGNUP=true`)  | `/auth/sign-up` refuses new accounts         |
+| Langfuse runs with no default secrets; telemetry and onboarding calls off | `infra/langfuse/.env` (git-ignored) | `docker compose config` finds no default secret values |
+| Coding agent can't read Langfuse secrets    | `.claude/settings.json` (Read deny + sandbox `denyRead`) | Ask the agent to `cat infra/langfuse/.env` → denied |
+| Prompts never leave the machine (local LLM) | Ollama on `127.0.0.1:11434`                       | `lsof -iTCP:11434 -sTCP:LISTEN` shows only `127.0.0.1` |
 | Server env validated; errors never echo values | `src/config.ts` (Zod)                          | `test/config.test.ts`                        |
 | Server binds to loopback by default; `/health` exposes no version or internals | `src/config.ts`, `src/server/app.ts` | `test/server/health.test.ts`, `test/config.test.ts` |
 
@@ -59,4 +68,13 @@
 - The coding agent sends source code to the LLM provider as part of normal operation. Accepted: the repository contains no customer data or secrets.
 - A human can skip the pre-commit hook locally with `--no-verify`. The CI `secrets` job is the backstop.
 - Approved dependencies can still be compromised in a later release. Mitigated by the lockfile, `pnpm audit` and reviewing Dependabot PRs, not eliminated.
+- The Langfuse MinIO image (`cgr.dev/chainguard/minio`) has no version pin: Chainguard only publishes `latest` for free images.
+- Traces are stored unencrypted in local Docker volumes. Accepted while traces contain only synthetic data; revisit in R1, when ticket content reaches traces.
+- Local models are less robust against prompt injection and less reliable at tool calling than frontier models. Accepted for development; eval results with a local model are not representative of a production model.
 - Dependency installs run in the user's terminal, outside the sandbox (pnpm 12 needs a system-level lock the macOS sandbox blocks), so the sandbox network allowlist does not apply to them. Accepted: a human reviews each package, build scripts stay blocked by `pnpm-workspace.yaml`, and CI re-runs `pnpm install --frozen-lockfile` and `pnpm audit`.
+
+## Release history
+
+| Release | Changes to this threat model |
+| :-----: | :--------------------------- |
+| R0 | Initial version: development environment, CI, coding agent, Fastify skeleton, self-hosted Langfuse and local Ollama. |
