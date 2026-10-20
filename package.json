@@ -10,7 +10,8 @@
 		"dev": "tsx watch src/server/index.ts",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run"
+		"test": "vitest run",
+		"hello": "node --env-file-if-exists=.env --import tsx scripts/hello.ts"
 	},
 	"author": "AZ",
 	"license": "MIT",
@@ -34,7 +35,14 @@
 		"vitest": "^5.0.5"
 	},
 	"dependencies": {
+		"@langchain/core": "^1.2.18",
+		"@langchain/ollama": "^1.3.0",
+		"@langfuse/core": "^6.0.0",
+		"@langfuse/langchain": "^6.0.0",
+		"@langfuse/otel": "^6.0.0",
+		"@opentelemetry/sdk-node": "^0.223.0",
 		"fastify": "^5.12.7",
+		"langchain": "^1.5.18",
 		"zod": "^4.6.7"
 	}
 }

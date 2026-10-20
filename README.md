@@ -16,7 +16,7 @@ This is a learning project focused on building agents the way production softwar
 | Validation | Zod |
 | HTTP | Fastify |
 | Tests | Vitest |
-| Observability | Langfuse (self-hosted, see [`infra/langfuse`](infra/langfuse)) |
+| Observability | Langfuse: Cloud (free tier) or self-hosted (see [`infra/langfuse`](infra/langfuse)) |
 | CI | GitHub Actions: secret scanning, dependency audit, lint, typecheck, tests |
 
 ## Prerequisites
@@ -42,7 +42,7 @@ cp .env.example .env
 
 Choose one option.
 
-**Option A — self-hosted (recommended for local development).** The stack in [`infra/langfuse`](infra/langfuse) is the official Langfuse v4 Docker Compose setup, hardened for local use: every port is bound to `127.0.0.1`, the UI runs on port `3100`, and all secrets come from a git-ignored `.env`.
+**Option A — self-hosted.** Needs roughly 3–5 GB of RAM next to the local model; on a 16 GB machine, Option B is lighter. The stack in [`infra/langfuse`](infra/langfuse) is the official Langfuse v4 Docker Compose setup, hardened for local use: every port is bound to `127.0.0.1`, the UI runs on port `3100`, and all secrets come from a git-ignored `.env`.
 
 ```bash
 cd infra/langfuse
@@ -64,14 +64,16 @@ docker compose logs -f langfuse-web
 
 Open <http://localhost:3100>, sign up, create a project and generate API keys. Then close sign-up for everyone else: set `AUTH_DISABLE_SIGNUP=true` in `infra/langfuse/.env` and run `docker compose up -d` again.
 
-**Option B — Langfuse Cloud.** Create a free project at [langfuse.com](https://langfuse.com) and use its API keys and base URL instead.
+**Option B — Langfuse Cloud (used for day-to-day development of this project).** Create a free project at [langfuse.com](https://langfuse.com) and use its API keys. The base URL depends on the region you choose: `https://cloud.langfuse.com` (EU) or `https://us.cloud.langfuse.com` (US).
+
+Why both options exist: [ADR-001](docs/adr/001-local-infrastructure.md).
 
 Either way, put the keys in the root `.env`:
 
 ```bash
 LANGFUSE_PUBLIC_KEY=pk-lf-...
 LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_BASE_URL=http://localhost:3100   # or your Langfuse Cloud URL
+LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or http://localhost:3100 for the self-hosted stack
 ```
 
 ### 3. Run
