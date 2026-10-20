@@ -1,3 +1,4 @@
 allowBuilds:
   lefthook: false
   esbuild: false
+  protobufjs: false
