@@ -10,7 +10,8 @@
 		"dev": "tsx watch src/server/index.ts",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run"
+		"test": "vitest run",
+		"hello": "node --env-file-if-exists=.env --import tsx scripts/hello.ts"
 	},
 	"author": "AZ",
 	"license": "MIT",

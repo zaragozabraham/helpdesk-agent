@@ -1,7 +1,7 @@
-import { loadConfig } from '../config.js';
+import { loadServerConfig } from '../config.js';
 import { buildApp } from './app.js';
 
-const config = loadConfig();
+const config = loadServerConfig();
 const app = buildApp({ logger: true });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
