@@ -26,6 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `engines.node` raised to `>=22.13`, required by ESLint 10 and Vitest 5.
 - `src/config.ts` split into `loadServerConfig()`, `loadLlmConfig()` and `loadLangfuseConfig()`, so the server does not need LLM variables.
 - `pnpm-workspace.yaml`: esbuild build script explicitly denied; the prebuilt platform binary is used.
+- Node version pinned in `.nvmrc` and read by CI (`node-version-file`), so local and CI run the same version.
+- Default local model is `qwen3.5:4b` (ADR-001).
+- Development tracing uses Langfuse Cloud (free tier); the self-hosted stack stays as a supported option (ADR-001 update).
 
 ### Security
 

@@ -17,7 +17,8 @@ Current release: R0 — project foundations (tooling, CI, security guardrails).
   - Never use `createReactAgent`, `AgentExecutor`, or legacy chains from `@langchain/classic`.
 - Validation: Zod for every external boundary (HTTP input, tool input/output, LLM structured output).
 - HTTP: Fastify. Tests: Vitest.
-- Observability: Langfuse, self-hosted from `infra/langfuse/` (UI at http://localhost:3100).
+- Observability: Langfuse. Day-to-day development uses Langfuse Cloud; a self-hosted stack lives in `infra/langfuse/`
+  (UI at http://localhost:3100). See `docs/adr/001-local-infrastructure.md`.
   Traced via OpenTelemetry (`@langfuse/otel` + `@langfuse/langchain`); tracing is on only when the Langfuse keys are set.
 - LLM: Ollama on localhost (`@langchain/ollama`), thinking mode off. Provider and model come from env
   (`LLM_PROVIDER`, `LLM_MODEL`); build models only through `createChatModel()` in `src/llm/model.ts`.
@@ -40,8 +41,8 @@ Run by the user in their own terminal. Propose the exact command, explain why, a
 - Remove or update a dependency: `pnpm remove <pkg>` / `pnpm update <pkg>`
 - One-off package: `pnpm dlx <pkg>`
 - Dev server: `pnpm dev` (tsx needs a local socket that the sandbox blocks)
-- Hello agent smoke test: `pnpm hello` (needs Ollama and, for traces, Langfuse on localhost)
-- Langfuse (observability): `cd infra/langfuse && docker compose up -d`
+- Hello agent smoke test: `pnpm hello` (needs Ollama on localhost and, for traces, the Langfuse keys and URL in `.env`)
+- Self-hosted Langfuse (optional): `cd infra/langfuse && docker compose up -d`
 - App database (Postgres + pgvector): `docker compose up -d` *(added later in R0; does not exist yet)*
 
 Never ask to run a blocked command outside the sandbox; hand it to the user instead.

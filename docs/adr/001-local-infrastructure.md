@@ -1,6 +1,6 @@
 # ADR-001: Local infrastructure for observability and LLM
 
-**Status:** Accepted
+**Status:** Accepted, amended on 2026-10-19 (see [Update](#update-2026-10-19-langfuse-cloud-for-day-to-day-development))
 **Date:** 2026-10-19
 **Release:** R0
 
@@ -66,3 +66,29 @@ Single runs, possibly including model load time. To be re-measured against the R
 | :----------- | :------------- |
 | `qwen3.5:4b` | `7f3251fa6878` |
 | `gemma4:12b` | `c7597fc90b86` |
+
+## Update 2026-10-19: Langfuse Cloud for day-to-day development
+
+### Context
+
+- The development machine has 16 GB of RAM. The self-hosted Langfuse stack (six containers) and the local model compete for memory: with `gemma4:12b` loaded the machine nearly froze, and memory pressure would also distort the latency measured in evals.
+- The privacy constraint above was overstated for this project: the Helpdesk Agent serves a **fictional** SaaS and every ticket is synthetic, so no real user data reaches traces.
+
+### Decision
+
+- Day-to-day development traces go to **Langfuse Cloud (free tier)**.
+- The self-hosted stack in `infra/langfuse/` stays in the repository as a **supported, documented option**: for reviewers who prefer it, for practicing operations in R6, and mandatory if real data ever reaches traces.
+- No code change: the Langfuse target is configured only through `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE_BASE_URL`.
+
+### Consequences
+
+**Positive:**
+
+- Several GB of memory freed for the local model.
+- Latency measurements are no longer distorted by memory pressure from the observability stack.
+
+**Negative:**
+
+- Traces leave the machine and are stored by a third party. Acceptable only while data stays synthetic (tracked in the threat model).
+- Free-tier usage limits apply; eval runs must stay within them.
+- The Langfuse API keys are now credentials for an external service.
