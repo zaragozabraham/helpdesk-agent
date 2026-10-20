@@ -24,12 +24,14 @@
 - HTTP requests to the Fastify server (R0: only `GET /health`)
 - Model weights pulled from the Ollama registry
 - Third-party container images for the Langfuse stack
+- LLM output and tool results in the hello agent (`src/agent/hello-agent.ts`)
 
 ## Capabilities per tool / agent
 
 | Tool / Agent               | Private data | Untrusted content | External communication |    Side effects    | Decision                                                                                         |
 | :------------------------- | :----------: | :---------------: | :--------------------: | :----------------: | :----------------------------------------------------------------------------------------------- |
 | Claude Code (coding agent) |   ✅ code    |    ✅ web/docs    |  ⚠️ git push, network  | ✅ edits, commands | Secret files denied (tool + sandbox); push requires approval; sandbox network allowlist; no hook bypass |
+| Hello agent (`get_service_status`) |   ❌    | ⚠️ user question |  ❌ local Ollama only   | ❌ read-only mock  | Accepted for R0: fixed mock data, no private data, no write tools                                  |
 
 > A row with ✅ in the first three columns is a **lethal trifecta**: redesign it or require human approval.
 
@@ -59,7 +61,9 @@
 | Langfuse runs with no default secrets; telemetry and onboarding calls off | `infra/langfuse/.env` (git-ignored) | `docker compose config` finds no default secret values |
 | Coding agent can't read Langfuse secrets    | `.claude/settings.json` (Read deny + sandbox `denyRead`) | Ask the agent to `cat infra/langfuse/.env` → denied |
 | Prompts never leave the machine (local LLM) | Ollama on `127.0.0.1:11434`                       | `lsof -iTCP:11434 -sTCP:LISTEN` shows only `127.0.0.1` |
-| Server env validated; errors never echo values | `src/config.ts` (Zod)                          | `test/config.test.ts`                        |
+| Server, LLM and Langfuse env validated; errors never echo values (incl. secret keys) | `src/config.ts` (Zod) | `test/config.test.ts` |
+| Traces go only to the configured Langfuse URL: no Langfuse Cloud fallback, keys must come as a pair with an explicit URL, tracing off without keys | `src/config.ts`, `src/observability/langfuse.ts` | `test/config.test.ts`, `test/observability/langfuse.test.ts` |
+| Tool input and output validated with Zod      | `src/agent/hello-agent.ts`                      | `test/agent/hello-agent.test.ts`             |
 | Server binds to loopback by default; `/health` exposes no version or internals | `src/config.ts`, `src/server/app.ts` | `test/server/health.test.ts`, `test/config.test.ts` |
 
 ## Accepted residual risk
@@ -71,10 +75,11 @@
 - The Langfuse MinIO image (`cgr.dev/chainguard/minio`) has no version pin: Chainguard only publishes `latest` for free images.
 - Traces are stored unencrypted in local Docker volumes. Accepted while traces contain only synthetic data; revisit in R1, when ticket content reaches traces.
 - Local models are less robust against prompt injection and less reliable at tool calling than frontier models. Accepted for development; eval results with a local model are not representative of a production model.
+- Traces include full prompts, tool inputs/outputs and model answers, with no PII masking yet (`LangfuseSpanProcessor` `mask` is unused). Accepted while the only agent handles fixed mock data; masking must be in place before user or ticket content reaches traces (R1).
 - Dependency installs run in the user's terminal, outside the sandbox (pnpm 12 needs a system-level lock the macOS sandbox blocks), so the sandbox network allowlist does not apply to them. Accepted: a human reviews each package, build scripts stay blocked by `pnpm-workspace.yaml`, and CI re-runs `pnpm install --frozen-lockfile` and `pnpm audit`.
 
 ## Release history
 
 | Release | Changes to this threat model |
 | :-----: | :--------------------------- |
-| R0 | Initial version: development environment, CI, coding agent, Fastify skeleton, self-hosted Langfuse and local Ollama. |
+| R0 | Initial version: development environment, CI, coding agent, Fastify skeleton, self-hosted Langfuse and local Ollama. Hello agent: tracing config, tool I/O validation, untraced-PII residual risk. |

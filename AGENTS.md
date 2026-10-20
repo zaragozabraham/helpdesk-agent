@@ -18,7 +18,10 @@ Current release: R0 — project foundations (tooling, CI, security guardrails).
 - Validation: Zod for every external boundary (HTTP input, tool input/output, LLM structured output).
 - HTTP: Fastify. Tests: Vitest.
 - Observability: Langfuse, self-hosted from `infra/langfuse/` (UI at http://localhost:3100).
-<!-- TODO: add LLM provider(s) and DB once decided -->
+  Traced via OpenTelemetry (`@langfuse/otel` + `@langfuse/langchain`); tracing is on only when the Langfuse keys are set.
+- LLM: Ollama on localhost (`@langchain/ollama`), thinking mode off. Provider and model come from env
+  (`LLM_PROVIDER`, `LLM_MODEL`); build models only through `createChatModel()` in `src/llm/model.ts`.
+<!-- TODO: add DB once decided -->
 
 ## Commands
 
@@ -37,6 +40,7 @@ Run by the user in their own terminal. Propose the exact command, explain why, a
 - Remove or update a dependency: `pnpm remove <pkg>` / `pnpm update <pkg>`
 - One-off package: `pnpm dlx <pkg>`
 - Dev server: `pnpm dev` (tsx needs a local socket that the sandbox blocks)
+- Hello agent smoke test: `pnpm hello` (needs Ollama and, for traces, Langfuse on localhost)
 - Langfuse (observability): `cd infra/langfuse && docker compose up -d`
 - App database (Postgres + pgvector): `docker compose up -d` *(added later in R0; does not exist yet)*
 
@@ -46,14 +50,17 @@ Never ask to run a blocked command outside the sandbox; hand it to the user inst
 
 - `src/config.ts` — environment config, validated with Zod
 - `src/server/` — Fastify app (`app.ts`, built without listening so tests use `inject()`) and entry point (`index.ts`)
-- `test/` — Vitest tests, mirroring `src/` (e.g. `test/server/health.test.ts`)
+- `src/llm/` — chat model factory; the only place that knows about providers
+- `src/observability/` — OpenTelemetry + Langfuse setup (`startTracing()` → callbacks and `shutdown()`)
+- `src/agent/` — agents and prompts; `hello-agent.ts` is the R0 smoke-test agent
+- `scripts/` — one-off runnable scripts (e.g. `scripts/hello.ts`)
+- `test/` — Vitest tests, mirroring `src/` (e.g. `test/server/health.test.ts`); agents are tested with `fakeModel()` from `langchain`
 - `docs/` — specs, ADRs, threat model
 - `infra/langfuse/` — self-hosted Langfuse stack (its own Docker Compose and git-ignored `.env`).
   Based on the official Langfuse v4 compose file; keep every port bound to `127.0.0.1`.
 
 Planned, not created yet:
 
-- `src/agent/` — agents, graphs and prompts (R1–R2)
 - `src/tools/` — one file per tool, with its Zod schema (R2)
 - `evals/` — datasets and eval runners (R1)
 
